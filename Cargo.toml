@@ -1,0 +1,8 @@
+[package]
+name = "pg-test"
+version = "0.1.0"
+authors = ["Kelly McLaughlin <kelly.mclaughlin@joyent.com>"]
+
+[dependencies]
+postgres = {version = "0.15.2", features=["with-uuid"]}
+uuid = { version = "0.5", features = ["v4"] }
