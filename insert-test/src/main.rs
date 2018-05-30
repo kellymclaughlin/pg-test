@@ -141,7 +141,7 @@ fn batched_txns() {
 }
 
 fn usage() {
-    println!("Usage: pg-test PG_URL [THREAD_COUNT] [THREAD_INSERTS] [BATCH_SIZE]");
+    println!("Usage: insert-test PG_URL [THREAD_COUNT] [THREAD_INSERTS] [BATCH_SIZE]");
 }
 
 fn main() {
