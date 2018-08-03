@@ -21,7 +21,7 @@ use uuid::Uuid;
  *
  * The program assumes the existence of a manta_bucket table in the public
  * schema as well in each schema to be tested, name as manta_bucket_X where
- * X is from the set [1,10000] currently.
+ * X is an unsigned integer.
  *
  * The create-vnode-schemas.sh script can be used to facilitate creation of
  * the schemas.
@@ -31,6 +31,7 @@ use uuid::Uuid;
 
 const THREAD_COUNT: i32 = 16;
 const THREAD_ITERATIONS: i32 = 1000;
+const SCHEMA_COUNT: u32 = 10000;
 
 struct MantaObject {
     key: String,
@@ -170,8 +171,8 @@ fn delete_public_table(conn: &Connection) {
     trans.commit().unwrap();
 }
 
-fn delete_schema_tables(conn: &Connection) {
-    for number in 1..10000 {
+fn delete_schema_tables(conn: &Connection, schema_count: u32) {
+    for number in 1..schema_count {
         let trans = conn.transaction().unwrap();
         let schema_name = "manta_bucket_".to_string() + &number.to_string();
         let delete_sql = "DELETE FROM ".to_string() + &schema_name + &".manta_bucket".to_string();
@@ -226,7 +227,12 @@ fn multiple_schema_queries() -> (histogram::Histogram, histogram::Histogram) {
         .parse()
         .unwrap_or(THREAD_ITERATIONS);
 
-    let schema = rand::thread_rng().gen::<u32>() % 10000;
+    let schema_count = args.get(4)
+        .unwrap_or(&SCHEMA_COUNT.to_string())
+        .parse()
+        .unwrap_or(SCHEMA_COUNT);
+
+    let schema = rand::thread_rng().gen::<u32>() % schema_count;
     let schema_name = "manta_bucket_".to_string() + &schema.to_string();
 
     let mut read_histogram = Histogram::new();
@@ -306,7 +312,7 @@ fn multiple_schema_queries() -> (histogram::Histogram, histogram::Histogram) {
 }
 
 fn usage() {
-    println!("Usage: multiple-schema-test PG_URL [THREAD_COUNT][THREAD_ITERATIONS]");
+    println!("Usage: multiple-schema-test PG_URL [THREAD_COUNT][THREAD_ITERATIONS] [SCHEMA_COUNT]");
 }
 
 fn main() {
@@ -322,6 +328,10 @@ fn main() {
         .unwrap_or(&THREAD_COUNT.to_string())
         .parse()
         .unwrap_or(THREAD_COUNT);
+    let schema_count = args.get(4)
+        .unwrap_or(&SCHEMA_COUNT.to_string())
+        .parse()
+        .unwrap_or(SCHEMA_COUNT);
 
     println!("Thread count: {:?}", thread_count);
 
@@ -344,5 +354,5 @@ fn main() {
         end2.duration_since(start2)
     );
 
-    delete_schema_tables(&conn);
+    delete_schema_tables(&conn, schema_count);
 }
