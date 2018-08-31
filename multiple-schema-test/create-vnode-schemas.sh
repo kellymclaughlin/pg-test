@@ -1,31 +1,31 @@
 #!/bin/bash
 
-echo "BEGIN;" >> ./deploy/appschema.sql;
-echo "" >> ./deploy/appschema.sql;
+echo "BEGIN;" >> ./create-schemas.sql;
+echo "" >> ./create-schemas.sql;
 
 arr=("$@")
 for i in "${arr[@]}";
 do
-    echo "CREATE SCHEMA IF NOT EXISTS manta_bucket_$i;" >> ./deploy/appschema.sql;
-    echo "CREATE TABLE IF NOT EXISTS manta_bucket_$i.manta_bucket (" >> ./deploy/appschema.sql
-    echo "    key text NOT NULL," >> ./deploy/appschema.sql
-    echo "    bucket text NOT NULL," >> ./deploy/appschema.sql
-    echo "    mtime timestamptz DEFAULT current_timestamp NOT NULL," >> ./deploy/appschema.sql
-    echo "    vnode bigint NOT NULL," >> ./deploy/appschema.sql
-    echo "    owner uuid NOT NULL," >> ./deploy/appschema.sql
-    echo "    creator uuid," >> ./deploy/appschema.sql
-    echo "    \"objectId\" uuid NOT NULL," >> ./deploy/appschema.sql
-    echo "    \"contentLength\" bigint," >> ./deploy/appschema.sql
-    echo "    \"contentMD5\" text," >> ./deploy/appschema.sql
-    echo "    \"contentType\" text," >> ./deploy/appschema.sql
-    echo "    headers text[]," >> ./deploy/appschema.sql
-    echo "    sharks text[]," >> ./deploy/appschema.sql
-    echo "    PRIMARY KEY (owner, bucket, key)" >> ./deploy/appschema.sql
-    echo ");" >> ./deploy/appschema.sql
-    echo "" >> ./deploy/appschema.sql;
-    echo "CREATE INDEX IF NOT EXISTS manta_bucket_owner_bucket_idx ON manta_bucket_$i.manta_bucket (owner, bucket);" >> ./deploy/appschema.sql
-    echo "" >> ./deploy/appschema.sql;
-    echo "" >> ./deploy/appschema.sql;
+    echo "CREATE SCHEMA IF NOT EXISTS manta_bucket_$i;" >> ./create-schemas.sql;
+    echo "CREATE TABLE IF NOT EXISTS manta_bucket_$i.manta_bucket_object (" >> ./create-schemas.sql
+    echo "    id uuid NOT NULL," >> ./create-schemas.sql
+    echo "    name text NOT NULL," >> ./create-schemas.sql
+    echo "    owner uuid NOT NULL," >> ./create-schemas.sql
+    echo "    bucket_id uuid NOT NULL," >> ./create-schemas.sql
+    echo "    created timestamptz DEFAULT current_timestamp NOT NULL," >> ./create-schemas.sql
+    echo "    modified timestamptz DEFAULT current_timestamp NOT NULL," >> ./create-schemas.sql
+    echo "    vnode bigint NOT NULL," >> ./create-schemas.sql
+    echo "    creator uuid," >> ./create-schemas.sql
+    echo "    content_length bigint," >> ./create-schemas.sql
+    echo "    content_md5 text," >> ./create-schemas.sql
+    echo "    content_type text," >> ./create-schemas.sql
+    echo "    headers hstore," >> ./create-schemas.sql
+    echo "    sharks hstore," >> ./create-schemas.sql
+    echo "    properties jsonb," >> ./create-schemas.sql
+    echo "    PRIMARY KEY (owner, bucket_id, name)" >> ./create-schemas.sql
+    echo ");" >> ./create-schemas.sql
+    echo "" >> ./create-schemas.sql;
+    echo "" >> ./create-schemas.sql;
 done
 
-echo "COMMIT;" >> ./deploy/appschema.sql;
+echo "COMMIT;" >> ./create-schemas.sql;

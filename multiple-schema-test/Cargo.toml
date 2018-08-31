@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Kelly McLaughlin <kelly.mclaughlin@joyent.com>"]
 
 [dependencies]
+clap = "2.32"
 histogram = "0.6.9"
 postgres = {version = "0.15.2", features=["with-uuid"]}
 rand = "0.5.0"
