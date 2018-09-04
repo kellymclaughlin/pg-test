@@ -6,6 +6,7 @@ extern crate rand;
 extern crate uuid;
 
 mod baseline;
+mod common;
 mod database;
 mod opts;
 mod schema;
