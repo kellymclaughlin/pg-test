@@ -2,5 +2,5 @@
 members = [
         "insert-test",
         "update-contention-test",
-        "multiple-schema-test"
+        "hierarchy-test"
 ]

@@ -33,7 +33,7 @@ use opts::Mode;
  *     ./create-vnode-schemas.sh {1..10000}
  */
 
-static APP: &'static str = "multiple-schema-test";
+static APP: &'static str = "hierarchy-test";
 const THREAD_COUNT: u32 = 16;
 const THREAD_ITERATIONS: u32 = 1000;
 const DEFAULT_HIERARCHY_COUNT: u32 = 10000;
@@ -43,7 +43,7 @@ fn main() {
     let matches = opts::parse(APP.to_string());
 
     // The url is guaranteed to be present if we make it here
-    let url = matches.value_of("url").unwrap().to_string();
+    let url = String::from(matches.value_of("url").unwrap());
     let thread_count = value_t!(matches, "threadCount", u32)
         .unwrap_or(THREAD_COUNT);
     let thread_iterations = value_t!(matches, "threadIterations", u32)
@@ -64,18 +64,21 @@ fn main() {
                                   Arc::new(thread_iterations));
             let end = Instant::now();
             println!("Baseline mode duration: {:?}", end.duration_since(start));
+
             baseline::delete_table(&conn);
         },
         Mode::Database => {
-            let _database_count = value_t!(matches, "databaseCount", u32)
+            let database_count = value_t!(matches, "databaseCount", u32)
                 .unwrap_or(DEFAULT_HIERARCHY_COUNT);
             let start = Instant::now();
-            database::run_threads(&thread_count);
+            database::run_threads(Arc::new(url),
+                                  &thread_count,
+                                  Arc::new(thread_iterations),
+                                  Arc::new(database_count));
             let end = Instant::now();
-            println!(
-                "Database mode duration: {:?}",
-                end.duration_since(start)
-            );
+            println!("Database mode duration: {:?}", end.duration_since(start));
+
+            database::delete_tables(&conn, database_count);
         },
         Mode::Schema => {
             let schema_count = value_t!(matches, "schemaCount", u32)
@@ -86,23 +89,22 @@ fn main() {
                                 Arc::new(thread_iterations),
                                 Arc::new(schema_count));
             let end = Instant::now();
-            println!(
-                "Schema mode duration: {:?}",
-                end.duration_since(start)
-            );
+            println!("Schema mode duration: {:?}", end.duration_since(start));
 
             schema::delete_tables(&conn, schema_count);
         },
         Mode::Table => {
-            let _table_count = value_t!(matches, "tableCount", u32)
+            let table_count = value_t!(matches, "tableCount", u32)
                 .unwrap_or(DEFAULT_HIERARCHY_COUNT);
             let start = Instant::now();
-            table::run_threads(&thread_count);
+            table::run_threads(Arc::new(url),
+                               &thread_count,
+                               Arc::new(thread_iterations),
+                               Arc::new(table_count));
             let end = Instant::now();
-            println!(
-                "Table mode duration: {:?}",
-                end.duration_since(start)
-            );
+            println!("Table mode duration: {:?}", end.duration_since(start));
+
+            table::delete_tables(&conn, table_count);
         }
     }
 }
