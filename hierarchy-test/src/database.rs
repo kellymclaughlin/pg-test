@@ -56,7 +56,8 @@ fn multiple_database_queries(url: Arc<String>,
     let db = (rng.gen::<u32>() + 1) % *db_count;
     let mut read_histogram = Histogram::new();
     let mut write_histogram = Histogram::new();
-    let conn = Connection::connect(&*url.as_str(), TlsMode::None).unwrap();
+    let url_with_db = [&*url, "/manta_bucket_", &db.to_string()].concat();
+    let conn = Connection::connect(url_with_db.as_str(), TlsMode::None).unwrap();
 
     for _number in 1..*thread_iterations {
         let o = MantaObject::new(&mut rng);
