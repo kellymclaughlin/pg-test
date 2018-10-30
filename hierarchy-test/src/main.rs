@@ -70,15 +70,16 @@ fn main() {
         Mode::Database => {
             let database_count = value_t!(matches, "databaseCount", u32)
                 .unwrap_or(DEFAULT_HIERARCHY_COUNT);
+            let url_arc = Arc::new(url);
             let start = Instant::now();
-            database::run_threads(Arc::new(url),
+            database::run_threads(url_arc.clone(),
                                   &thread_count,
                                   Arc::new(thread_iterations),
                                   Arc::new(database_count));
             let end = Instant::now();
             println!("Database mode duration: {:?}", end.duration_since(start));
 
-            database::delete_tables(&conn, database_count);
+            database::delete_tables(url_arc.clone(), database_count);
         },
         Mode::Schema => {
             let schema_count = value_t!(matches, "schemaCount", u32)

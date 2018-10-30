@@ -3,6 +3,7 @@ extern crate postgres;
 extern crate rand;
 extern crate uuid;
 
+use std::error::Error;
 use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
@@ -96,7 +97,8 @@ fn multiple_database_queries(url: Arc<String>,
         let read_sql = ["SELECT * FROM ",
                         &"manta_bucket_",
                         &db.to_string(),
-                        &".manta_bucket_object WHERE owner = $1 \
+                        &".public.manta_bucket_object \
+                          WHERE owner = $1 \
                           AND bucket_id = $2 \
                           AND name = $3"].concat();
 
@@ -117,13 +119,21 @@ fn multiple_database_queries(url: Arc<String>,
 }
 
 
-pub fn delete_tables(conn: &Connection, db_count: u32) {
+pub fn delete_tables(url: Arc<String>, db_count: u32) {
     for number in 1..db_count {
-        let trans = conn.transaction().unwrap();
-        let delete_sql = ["DELETE FROM manta_bucket_",
-                          &number.to_string(),
-                          &".public.manta_bucket_object"].concat();
-        trans.execute(delete_sql.as_str(), &[]).unwrap();
-        trans.commit().unwrap();
+        let url_with_db = [&url, "/manta_bucket_", &number.to_string()].concat();
+        match Connection::connect(url_with_db.as_str(), TlsMode::None) {
+            Ok(conn) => {
+                let trans = conn.transaction().unwrap();
+                let delete_sql = ["DELETE FROM manta_bucket_",
+                                  &number.to_string(),
+                                  &".public.manta_bucket_object"].concat();
+                trans.execute(delete_sql.as_str(), &[]).unwrap();
+                trans.commit().unwrap();
+            },
+            Err(e) => {
+                eprintln!("Postgres connection error: {}", e.description());
+            }
+        }
     }
 }

@@ -3,24 +3,29 @@
 arr=("$@")
 for i in "${arr[@]}";
 do
-    echo "CREATE DATABASE manta_bucket_database_$i;" >> ./create-databases.sql;
-    echo "CREATE TABLE IF NOT EXISTS manta_bucket_database_$i.public.manta_bucket_object (" >> ./create-databases.sql
-    echo "    id uuid NOT NULL," >> ./create-databases.sql
-    echo "    name text NOT NULL," >> ./create-databases.sql
-    echo "    owner uuid NOT NULL," >> ./create-databases.sql
-    echo "    bucket_id uuid NOT NULL," >> ./create-databases.sql
-    echo "    created timestamptz DEFAULT current_timestamp NOT NULL," >> ./create-databases.sql
-    echo "    modified timestamptz DEFAULT current_timestamp NOT NULL," >> ./create-databases.sql
-    echo "    vnode bigint NOT NULL," >> ./create-databases.sql
-    echo "    creator uuid," >> ./create-databases.sql
-    echo "    content_length bigint," >> ./create-databases.sql
-    echo "    content_md5 text," >> ./create-databases.sql
-    echo "    content_type text," >> ./create-databases.sql
-    echo "    headers hstore," >> ./create-databases.sql
-    echo "    sharks hstore," >> ./create-databases.sql
-    echo "    properties jsonb," >> ./create-databases.sql
-    echo "    PRIMARY KEY (owner, bucket_id, name)" >> ./create-databases.sql
-    echo ");" >> ./create-databases.sql
-    echo "" >> ./create-databases.sql;
-    echo "" >> ./create-databases.sql;
+    db_filename="create-databases-$i.sql";
+    table_filename="create-databases-table-$i.sql";
+    echo "CREATE DATABASE manta_bucket_$i;" >> $db_filename;
+    echo "" >> $db_filename;
+    echo "CREATE EXTENSION hstore;" >> $table_filename
+    echo "CREATE EXTENSION pgcrypto;" >> $table_filename
+    echo "CREATE TABLE IF NOT EXISTS manta_bucket_$i.public.manta_bucket_object (" >> $table_filename
+    echo "    id uuid NOT NULL," >> $table_filename
+    echo "    name text NOT NULL," >> $table_filename
+    echo "    owner uuid NOT NULL," >> $table_filename
+    echo "    bucket_id uuid NOT NULL," >> $table_filename
+    echo "    created timestamptz DEFAULT current_timestamp NOT NULL," >> $table_filename
+    echo "    modified timestamptz DEFAULT current_timestamp NOT NULL," >> $table_filename
+    echo "    vnode bigint NOT NULL," >> $table_filename
+    echo "    creator uuid," >> $table_filename
+    echo "    content_length bigint," >> $table_filename
+    echo "    content_md5 text," >> $table_filename
+    echo "    content_type text," >> $table_filename
+    echo "    headers hstore," >> $table_filename
+    echo "    sharks hstore," >> $table_filename
+    echo "    properties jsonb," >> $table_filename
+    echo "    PRIMARY KEY (owner, bucket_id, name)" >> $table_filename
+    echo ");" >> $table_filename
+    echo "" >> $table_filename;
+    echo "" >> $table_filename;
 done
